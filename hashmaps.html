@@ -6,156 +6,205 @@
 <title>Hash Maps — Interview Prep</title>
 <style>
   :root {
-    --bg: #1a1d23;
-    --bg-card: #20242c;
-    --text: #e4e6eb;
-    --text-dim: #8b92a3;
-    --accent: #4fd1c5;
-    --accent-dim: #2d5f5a;
-    --easy: #6ee7b7;
-    --medium: #e8b563;
-    --hard: #f08787;
-    --border: #2c313c;
-    --code-bg: #14161b;
+    --bg-page: #e5ddc8;
+    --bg-sidebar: #ded4ba;
+    --bg-content: #ebe3d0;
+    --bg-code: #ddd3ba;
+    --border: #cabf9f;
+    --border-light: #d3c8ac;
+    --text-primary: #332c20;
+    --text-secondary: #665d4c;
+    --text-muted: #847a63;
+    --accent: #6b5ca8;
+    --accent-light: #d2c4ec;
+    --accent-border: #a89bd6;
+    --easy-bg: #d3e8da;
+    --easy-text: #25623f;
+    --medium-bg: #f3e2c4;
+    --medium-text: #8a5a12;
+    --hard-bg: #f2d6d1;
+    --hard-text: #96311f;
   }
 
   * { box-sizing: border-box; }
 
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg-page);
+    color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
     margin: 0;
     padding: 0;
     line-height: 1.6;
   }
 
-  .wrap {
-    max-width: 720px;
+  .app {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 48px 24px 120px;
   }
 
-  header {
-    margin-bottom: 40px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 24px 14px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
   }
 
-  header .eyebrow {
-    color: var(--accent);
-    font-size: 13px;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
-    margin-bottom: 8px;
-  }
-
-  header h1 {
-    font-size: 28px;
-    margin: 0 0 8px;
+  .sidebar-title {
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    padding: 0 10px 4px;
+    text-transform: uppercase;
   }
 
-  header p {
-    color: var(--text-dim);
-    margin: 0;
-    font-size: 15px;
+  .sidebar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 10px 16px;
   }
 
-  .progress-bar {
-    margin-top: 20px;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.4s ease;
-  }
-
-  .progress-label {
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px;
+    border-radius: 6px;
     font-size: 13px;
-    color: var(--text-dim);
-    margin-top: 8px;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 2px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s ease;
   }
 
-  .problem {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 28px;
-    margin-bottom: 24px;
+  .nav-item:hover {
+    background: rgba(107, 92, 168, 0.08);
+  }
+
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--text-primary);
+    border-left: 2px solid var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-item .num {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 14px;
+  }
+
+  .nav-item.active .num {
+    color: var(--accent);
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .nav-item.bonus {
+    font-style: italic;
+  }
+
+  /* Content */
+  .content-area {
+    flex: 1;
+    background: var(--bg-content);
+    padding: 36px 44px;
+    min-width: 0;
+  }
+
+  .problem-panel {
+    display: none;
+    max-width: 640px;
+  }
+
+  .problem-panel.active {
+    display: block;
   }
 
   .problem-header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 4px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
     flex-wrap: wrap;
-    gap: 8px;
   }
 
   .problem-title {
-    font-size: 19px;
+    font-size: 21px;
     font-weight: 600;
-    color: var(--text);
     margin: 0;
   }
 
   .problem-num {
     color: var(--accent);
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
-    font-weight: 400;
-    font-size: 15px;
+    font-weight: 500;
   }
 
   .difficulty {
-    font-size: 12px;
-    padding: 3px 10px;
+    font-size: 11px;
+    padding: 3px 11px;
     border-radius: 20px;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
-    white-space: nowrap;
+    font-weight: 500;
   }
 
-  .difficulty.easy { color: var(--easy); background: rgba(110, 231, 183, 0.1); }
-  .difficulty.medium { color: var(--medium); background: rgba(232, 181, 99, 0.1); }
-  .difficulty.hard { color: var(--hard); background: rgba(240, 135, 135, 0.1); }
+  .difficulty.easy { background: var(--easy-bg); color: var(--easy-text); }
+  .difficulty.medium { background: var(--medium-bg); color: var(--medium-text); }
+  .difficulty.hard { background: var(--hard-bg); color: var(--hard-text); }
+
+  .bonus-tag {
+    font-size: 11px;
+    padding: 3px 11px;
+    border-radius: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
 
   .section-label {
-    font-size: 12px;
-    color: var(--text-dim);
+    font-size: 11px;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin: 20px 0 8px;
+    margin: 22px 0 8px;
     font-weight: 600;
   }
 
-  .section-label:first-of-type { margin-top: 16px; }
+  .section-label:first-of-type {
+    margin-top: 16px;
+  }
 
   .statement {
-    color: var(--text);
     font-size: 15px;
+    color: var(--text-primary);
   }
 
   .example {
-    background: var(--code-bg);
+    background: var(--bg-code);
     border-radius: 6px;
     padding: 12px 14px;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-family: "SF Mono", Consolas, monospace;
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-secondary);
     margin-top: 8px;
     white-space: pre-wrap;
   }
 
   .summary {
-    color: var(--text);
     font-size: 15px;
+    color: var(--text-primary);
   }
 
   .approach ol {
@@ -171,29 +220,27 @@
   .toggle-row {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 22px;
   }
 
   .toggle-btn {
     background: transparent;
-    border: 1px solid var(--accent-dim);
+    border: 1px solid var(--accent-border);
     color: var(--accent);
     padding: 8px 16px;
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease;
   }
 
   .toggle-btn:hover {
-    background: rgba(79, 209, 197, 0.1);
-    border-color: var(--accent);
+    background: var(--accent-light);
   }
 
   .toggle-btn.active {
     background: var(--accent);
-    color: var(--bg);
+    color: #f2ede0;
     border-color: var(--accent);
   }
 
@@ -208,17 +255,17 @@
   }
 
   pre.code-block {
-    background: var(--code-bg);
+    background: var(--bg-code);
     border-radius: 6px;
     padding: 16px;
     overflow-x: auto;
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-family: "SF Mono", Consolas, monospace;
     font-size: 13px;
     line-height: 1.5;
     margin: 12px 0 0;
   }
 
-  code { color: #a8dadc; }
+  code { color: var(--text-primary); }
 
   .complexity-grid {
     display: grid;
@@ -228,13 +275,13 @@
   }
 
   .complexity-item {
-    background: var(--code-bg);
+    background: var(--bg-code);
     border-radius: 6px;
     padding: 12px 14px;
   }
 
   .complexity-tag {
-    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-family: "SF Mono", Consolas, monospace;
     color: var(--accent);
     font-size: 14px;
     font-weight: 600;
@@ -243,36 +290,44 @@
 
   .complexity-reason {
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-secondary);
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      display: flex;
+      overflow-x: auto;
+      padding: 12px;
+      gap: 4px;
+    }
+    .sidebar-title, .sidebar-sub, .nav-divider { display: none; }
+    .nav-item { white-space: nowrap; margin-bottom: 0; }
+    .content-area { padding: 24px 20px; }
     .complexity-grid { grid-template-columns: 1fr; }
-    .wrap { padding: 32px 16px 100px; }
-    .problem { padding: 20px; }
   }
-
-  ::selection { background: var(--accent-dim); }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app">
 
-  <header>
-    <div class="eyebrow">Topic 1 / 9</div>
-    <h1>Hash Maps</h1>
-    <p>6 problems · blind-attempt the code, then reveal to compare</p>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-label" id="progressLabel">0 / 6 revealed</div>
-  </header>
+  <div class="sidebar">
+    <div class="sidebar-title">Topic 1 / 9</div>
+    <div class="sidebar-sub">Hash Maps</div>
+    <div id="navList"></div>
+  </div>
 
-  <div id="problems"></div>
+  <div class="content-area" id="contentArea"></div>
 
 </div>
 
 <script>
 const problems = [
   {
+    id: "p1",
     num: 1,
     title: "Two Sum",
     difficulty: "easy",
@@ -305,6 +360,7 @@ const problems = [
     scReason: "hash map can store up to n key-value pairs"
   },
   {
+    id: "p2",
     num: 2,
     title: "Valid Anagram",
     difficulty: "easy",
@@ -339,6 +395,7 @@ const problems = [
     scReason: "hash map stores counts for up to n distinct characters"
   },
   {
+    id: "p3",
     num: 3,
     title: "Contains Duplicate",
     difficulty: "easy",
@@ -366,6 +423,7 @@ const problems = [
     scReason: "set can store up to n unique values"
   },
   {
+    id: "p4",
     num: 4,
     title: "Majority Element",
     difficulty: "medium",
@@ -396,6 +454,7 @@ const problems = [
     scReason: "hash map can store counts for up to n distinct values"
   },
   {
+    id: "p5",
     num: 5,
     title: "Group Anagrams",
     difficulty: "medium",
@@ -427,6 +486,7 @@ const problems = [
     scReason: "hash map stores every original string across all groups"
   },
   {
+    id: "p6",
     num: 6,
     title: "Longest Substring Without Repeating Characters",
     difficulty: "medium",
@@ -461,19 +521,110 @@ const problems = [
     tcReason: "left and right pointers each move forward at most n times total",
     sc: "O(min(n, m))",
     scReason: "hash map stores at most one entry per distinct character (m = alphabet size)"
+  },
+  {
+    id: "bonus1",
+    num: null,
+    title: "Three Sum",
+    difficulty: "medium",
+    bonus: true,
+    statement: "Given an array of integers, find all unique triplets [a, b, c] such that a + b + c = 0. The solution set must not contain duplicate triplets.",
+    example: "Input: nums = [-1, 0, 1, 2, -1, -4]\nOutput: [[-1, -1, 2], [-1, 0, 1]]",
+    summary: "Sort the array, then fix one number and use two pointers to find pairs that sum to its negative — a variant that layers two pointers on top of the Two Sum idea.",
+    approach: [
+      "Sort the array first",
+      "Loop through the array, fixing one number at index i (skip duplicates for i)",
+      "Set left = i + 1, right = end of array",
+      "While left < right: check if nums[i] + nums[left] + nums[right] equals 0",
+      "If sum is 0, record the triplet, then move both pointers inward (skip duplicates)",
+      "If sum is too small, move left forward; if too large, move right backward",
+      "Continue until all triplets are found"
+    ],
+    code: `function threeSum(nums) {
+    nums.sort((a, b) => a - b);
+    const result = [];
+
+    for (let i = 0; i < nums.length - 2; i++) {
+        if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+        let left = i + 1;
+        let right = nums.length - 1;
+
+        while (left < right) {
+            const sum = nums[i] + nums[left] + nums[right];
+            if (sum === 0) {
+                result.push([nums[i], nums[left], nums[right]]);
+                while (left < right && nums[left] === nums[left + 1]) left++;
+                while (left < right && nums[right] === nums[right - 1]) right--;
+                left++;
+                right--;
+            } else if (sum < 0) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+    }
+
+    return result;
+}`,
+    tc: "O(n²)",
+    tcReason: "sorting is O(n log n), then one outer loop with a two-pointer inner scan gives O(n²) overall",
+    sc: "O(1)",
+    scReason: "excluding the output array, only a constant number of pointers are used (sort may use O(log n) internally)"
   }
 ];
 
-const container = document.getElementById('problems');
-let revealedCount = 0;
+const navList = document.getElementById('navList');
+const contentArea = document.getElementById('contentArea');
 
-problems.forEach((p, idx) => {
-  const div = document.createElement('div');
-  div.className = 'problem';
-  div.innerHTML = `
+const coreProblems = problems.filter(p => !p.bonus);
+const bonusProblems = problems.filter(p => p.bonus);
+
+coreProblems.forEach(p => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item';
+  navItem.dataset.id = p.id;
+  navItem.innerHTML = `<span class="num">${p.num}.</span><span>${p.title}</span>`;
+  navList.appendChild(navItem);
+});
+
+if (bonusProblems.length) {
+  const divider = document.createElement('div');
+  divider.className = 'nav-divider';
+  navList.appendChild(divider);
+
+  bonusProblems.forEach(p => {
+    const navItem = document.createElement('div');
+    navItem.className = 'nav-item bonus';
+    navItem.dataset.id = p.id;
+    navItem.innerHTML = `<span>${p.title}</span>`;
+    navList.appendChild(navItem);
+  });
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+problems.forEach(p => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + p.id;
+
+  const titlePrefix = p.bonus ? '' : `<span class="problem-num">#${p.num}</span> `;
+  const badge = p.bonus
+    ? `<span class="bonus-tag">bonus variant</span>`
+    : `<span class="difficulty ${p.difficulty}">${p.difficulty}</span>`;
+
+  panel.innerHTML = `
     <div class="problem-header">
-      <h2 class="problem-title"><span class="problem-num">#${p.num}</span> ${p.title}</h2>
-      <span class="difficulty ${p.difficulty}">${p.difficulty}</span>
+      <h2 class="problem-title">${titlePrefix}${p.title}</h2>
+      ${badge}
+      ${p.bonus ? `<span class="difficulty ${p.difficulty}">${p.difficulty}</span>` : ''}
     </div>
 
     <div class="statement">${p.statement}</div>
@@ -488,16 +639,16 @@ problems.forEach((p, idx) => {
     </div>
 
     <div class="toggle-row">
-      <button class="toggle-btn" data-target="code-${idx}" data-type="code">Show Code</button>
-      <button class="toggle-btn" data-target="complexity-${idx}" data-type="complexity">Show Complexity</button>
+      <button class="toggle-btn" data-target="code-${p.id}" data-type="code">Show code</button>
+      <button class="toggle-btn" data-target="complexity-${p.id}" data-type="complexity">Show complexity</button>
     </div>
 
-    <div class="hidden-content" id="code-${idx}">
+    <div class="hidden-content" id="code-${p.id}">
       <div class="section-label">Code</div>
       <pre class="code-block"><code>${escapeHtml(p.code)}</code></pre>
     </div>
 
-    <div class="hidden-content" id="complexity-${idx}">
+    <div class="hidden-content" id="complexity-${p.id}">
       <div class="section-label">Complexity</div>
       <div class="complexity-grid">
         <div class="complexity-item">
@@ -511,18 +662,25 @@ problems.forEach((p, idx) => {
       </div>
     </div>
   `;
-  container.appendChild(div);
+  contentArea.appendChild(panel);
 });
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+function selectProblem(id) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+  document.querySelectorAll('.problem-panel').forEach(el => {
+    el.classList.toggle('active', el.id === 'panel-' + id);
+  });
 }
 
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => selectProblem(item.dataset.id));
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('toggle-btn')) {
+    const btn = e.target;
     const targetId = btn.getAttribute('data-target');
     const target = document.getElementById(targetId);
     const isOpen = target.classList.contains('open');
@@ -531,26 +689,14 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.classList.toggle('active');
 
     if (btn.dataset.type === 'code') {
-      if (!isOpen) {
-        btn.textContent = 'Hide Code';
-        revealedCount++;
-      } else {
-        btn.textContent = 'Show Code';
-        revealedCount--;
-      }
-      updateProgress();
+      btn.textContent = isOpen ? 'Show code' : 'Hide code';
     } else {
-      btn.textContent = isOpen ? 'Show Complexity' : 'Hide Complexity';
+      btn.textContent = isOpen ? 'Show complexity' : 'Hide complexity';
     }
-  });
+  }
 });
 
-function updateProgress() {
-  const total = problems.length;
-  const pct = (revealedCount / total) * 100;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${revealedCount} / ${total} revealed`;
-}
+selectProblem('p1');
 </script>
 
 </body>
