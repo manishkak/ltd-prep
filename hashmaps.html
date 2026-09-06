@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hash Maps — Interview Prep</title>
+<style>
+  :root {
+    --bg: #1a1d23;
+    --bg-card: #20242c;
+    --text: #e4e6eb;
+    --text-dim: #8b92a3;
+    --accent: #4fd1c5;
+    --accent-dim: #2d5f5a;
+    --easy: #6ee7b7;
+    --medium: #e8b563;
+    --hard: #f08787;
+    --border: #2c313c;
+    --code-bg: #14161b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 120px;
+  }
+
+  header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header .eyebrow {
+    color: var(--accent);
+    font-size: 13px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    margin-bottom: 8px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  header p {
+    color: var(--text-dim);
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .progress-bar {
+    margin-top: 20px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+  }
+
+  .problem {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .problem-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .problem-title {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .problem-num {
+    color: var(--accent);
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-weight: 400;
+    font-size: 15px;
+  }
+
+  .difficulty {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    white-space: nowrap;
+  }
+
+  .difficulty.easy { color: var(--easy); background: rgba(110, 231, 183, 0.1); }
+  .difficulty.medium { color: var(--medium); background: rgba(232, 181, 99, 0.1); }
+  .difficulty.hard { color: var(--hard); background: rgba(240, 135, 135, 0.1); }
+
+  .section-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 20px 0 8px;
+    font-weight: 600;
+  }
+
+  .section-label:first-of-type { margin-top: 16px; }
+
+  .statement {
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .example {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    white-space: pre-wrap;
+  }
+
+  .summary {
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .approach ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .approach li {
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .toggle-btn {
+    background: transparent;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(79, 209, 197, 0.1);
+    border-color: var(--accent);
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .hidden-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .hidden-content.open {
+    max-height: 2000px;
+  }
+
+  pre.code-block {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 12px 0 0;
+  }
+
+  code { color: #a8dadc; }
+
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .complexity-item {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .complexity-tag {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .complexity-reason {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 600px) {
+    .complexity-grid { grid-template-columns: 1fr; }
+    .wrap { padding: 32px 16px 100px; }
+    .problem { padding: 20px; }
+  }
+
+  ::selection { background: var(--accent-dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Topic 1 / 9</div>
+    <h1>Hash Maps</h1>
+    <p>6 problems · blind-attempt the code, then reveal to compare</p>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 6 revealed</div>
+  </header>
+
+  <div id="problems"></div>
+
+</div>
+
+<script>
+const problems = [
+  {
+    num: 1,
+    title: "Two Sum",
+    difficulty: "easy",
+    statement: "Given an array of integers and a target value, return the indices of the two numbers that add up to the target. Assume exactly one solution exists, and you cannot use the same element twice.",
+    example: "Input: nums = [2, 7, 11, 15], target = 9\nOutput: [0, 1]\nExplanation: nums[0] + nums[1] = 2 + 7 = 9",
+    summary: "Use a hash map to store seen values and their indices. For each element, check if its complement already exists.",
+    approach: [
+      "Create an empty hash map",
+      "Iterate through the array",
+      "For each number, calculate complement = target - current_num",
+      "Check if complement exists in hash map",
+      "If yes, return indices [hash_map[complement], current_index]",
+      "If no, store current_num and its index in hash map",
+      "Continue until pair found"
+    ],
+    code: `function twoSum(nums, target) {
+    const map = {};
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (complement in map) {
+            return [map[complement], i];
+        }
+        map[nums[i]] = i;
+    }
+    return [];
+}`,
+    tc: "O(n)",
+    tcReason: "single pass through the array, hash map lookups are O(1)",
+    sc: "O(n)",
+    scReason: "hash map can store up to n key-value pairs"
+  },
+  {
+    num: 2,
+    title: "Valid Anagram",
+    difficulty: "easy",
+    statement: "Given two strings, determine if the second string is an anagram of the first — meaning it uses exactly the same characters with the same frequency, just rearranged.",
+    example: "Input: s = \"anagram\", t = \"nagaram\"\nOutput: true\n\nInput: s = \"rat\", t = \"car\"\nOutput: false",
+    summary: "Check if two strings are anagrams by comparing character frequencies using a hash map.",
+    approach: [
+      "If lengths differ, return false (can't be anagrams)",
+      "Create hash map for first string (count each character)",
+      "Iterate through second string and decrement counts",
+      "If any character is missing or count would go below zero, return false",
+      "If all counts return to zero, return true"
+    ],
+    code: `function isAnagram(s, t) {
+    if (s.length !== t.length) return false;
+
+    const map = {};
+    for (let char of s) {
+        map[char] = (map[char] || 0) + 1;
+    }
+
+    for (let char of t) {
+        if (!map[char]) return false;
+        map[char]--;
+    }
+
+    return true;
+}`,
+    tc: "O(n)",
+    tcReason: "two linear passes, one over each string",
+    sc: "O(n)",
+    scReason: "hash map stores counts for up to n distinct characters"
+  },
+  {
+    num: 3,
+    title: "Contains Duplicate",
+    difficulty: "easy",
+    statement: "Given an array of integers, return true if any value appears at least twice, and false if every element is distinct.",
+    example: "Input: nums = [1, 2, 3, 1]\nOutput: true\n\nInput: nums = [1, 2, 3, 4]\nOutput: false",
+    summary: "Use a hash set to track values seen so far; a repeat means a duplicate exists.",
+    approach: [
+      "Create an empty hash set",
+      "Iterate through the array",
+      "If the element already exists in the set, return true",
+      "Otherwise, add the element to the set",
+      "If the loop completes with no match, return false"
+    ],
+    code: `function containsDuplicate(nums) {
+    const seen = new Set();
+    for (let num of nums) {
+        if (seen.has(num)) return true;
+        seen.add(num);
+    }
+    return false;
+}`,
+    tc: "O(n)",
+    tcReason: "single pass through the array, Set lookups are O(1)",
+    sc: "O(n)",
+    scReason: "set can store up to n unique values"
+  },
+  {
+    num: 4,
+    title: "Majority Element",
+    difficulty: "medium",
+    statement: "Given an array of size n, return the element that appears more than ⌊n/2⌋ times. Assume the array always has a majority element.",
+    example: "Input: nums = [2, 2, 1, 1, 1, 2, 2]\nOutput: 2",
+    summary: "Find the element appearing more than n/2 times using a hash map frequency count.",
+    approach: [
+      "Create a hash map to count the frequency of each number",
+      "Iterate through the array, incrementing the count for each number",
+      "Track the element with the highest count seen so far",
+      "If a count exceeds n/2, that element is the majority element",
+      "Return the element with the highest count"
+    ],
+    code: `function majorityElement(nums) {
+    const map = {};
+    const threshold = nums.length / 2;
+
+    for (let num of nums) {
+        map[num] = (map[num] || 0) + 1;
+        if (map[num] > threshold) {
+            return num;
+        }
+    }
+}`,
+    tc: "O(n)",
+    tcReason: "single pass through the array with O(1) hash map updates",
+    sc: "O(n)",
+    scReason: "hash map can store counts for up to n distinct values"
+  },
+  {
+    num: 5,
+    title: "Group Anagrams",
+    difficulty: "medium",
+    statement: "Given an array of strings, group the strings that are anagrams of each other into sublists. Return the groups in any order.",
+    example: "Input: strs = [\"eat\", \"tea\", \"tan\", \"ate\", \"nat\", \"bat\"]\nOutput: [[\"eat\",\"tea\",\"ate\"],[\"tan\",\"nat\"],[\"bat\"]]",
+    summary: "Group words that are anagrams by using their sorted-character form as a shared hash map key.",
+    approach: [
+      "Create a hash map with sorted strings as keys",
+      "For each word, sort its characters to get its canonical form",
+      "Add the original word to the list stored under that canonical key",
+      "Return all groups (the values of the hash map)"
+    ],
+    code: `function groupAnagrams(strs) {
+    const map = {};
+
+    for (let str of strs) {
+        const sorted = str.split('').sort().join('');
+        if (!map[sorted]) {
+            map[sorted] = [];
+        }
+        map[sorted].push(str);
+    }
+
+    return Object.values(map);
+}`,
+    tc: "O(n · k log k)",
+    tcReason: "n strings, each sorted in O(k log k) where k is string length",
+    sc: "O(n · k)",
+    scReason: "hash map stores every original string across all groups"
+  },
+  {
+    num: 6,
+    title: "Longest Substring Without Repeating Characters",
+    difficulty: "medium",
+    statement: "Given a string, find the length of the longest substring that contains no repeating characters.",
+    example: "Input: s = \"abcabcbb\"\nOutput: 3\nExplanation: the answer is \"abc\", with length 3.",
+    summary: "Use a hash map plus a sliding window to track the last seen position of each character and find the longest valid window.",
+    approach: [
+      "Create a hash map to store the last seen index of each character",
+      "Use two pointers: left and right, both starting at 0",
+      "Expand the window by moving right one step at a time",
+      "If the character at right was seen before and is inside the current window, move left just past that previous occurrence",
+      "Update the character's last seen index to right",
+      "Track the maximum window size (right - left + 1) seen so far",
+      "Return the maximum length"
+    ],
+    code: `function lengthOfLongestSubstring(s) {
+    const map = {};
+    let left = 0;
+    let maxLen = 0;
+
+    for (let right = 0; right < s.length; right++) {
+        if (map[s[right]] !== undefined && map[s[right]] >= left) {
+            left = map[s[right]] + 1;
+        }
+        map[s[right]] = right;
+        maxLen = Math.max(maxLen, right - left + 1);
+    }
+
+    return maxLen;
+}`,
+    tc: "O(n)",
+    tcReason: "left and right pointers each move forward at most n times total",
+    sc: "O(min(n, m))",
+    scReason: "hash map stores at most one entry per distinct character (m = alphabet size)"
+  }
+];
+
+const container = document.getElementById('problems');
+let revealedCount = 0;
+
+problems.forEach((p, idx) => {
+  const div = document.createElement('div');
+  div.className = 'problem';
+  div.innerHTML = `
+    <div class="problem-header">
+      <h2 class="problem-title"><span class="problem-num">#${p.num}</span> ${p.title}</h2>
+      <span class="difficulty ${p.difficulty}">${p.difficulty}</span>
+    </div>
+
+    <div class="statement">${p.statement}</div>
+    <div class="example">${p.example}</div>
+
+    <div class="section-label">Summary</div>
+    <div class="summary">${p.summary}</div>
+
+    <div class="section-label">Approach</div>
+    <div class="approach">
+      <ol>${p.approach.map(step => `<li>${step}</li>`).join('')}</ol>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" data-target="code-${idx}" data-type="code">Show Code</button>
+      <button class="toggle-btn" data-target="complexity-${idx}" data-type="complexity">Show Complexity</button>
+    </div>
+
+    <div class="hidden-content" id="code-${idx}">
+      <div class="section-label">Code</div>
+      <pre class="code-block"><code>${escapeHtml(p.code)}</code></pre>
+    </div>
+
+    <div class="hidden-content" id="complexity-${idx}">
+      <div class="section-label">Complexity</div>
+      <div class="complexity-grid">
+        <div class="complexity-item">
+          <div class="complexity-tag">Time: ${p.tc}</div>
+          <div class="complexity-reason">${p.tcReason}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="complexity-tag">Space: ${p.sc}</div>
+          <div class="complexity-reason">${p.scReason}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+});
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    const isOpen = target.classList.contains('open');
+
+    target.classList.toggle('open');
+    btn.classList.toggle('active');
+
+    if (btn.dataset.type === 'code') {
+      if (!isOpen) {
+        btn.textContent = 'Hide Code';
+        revealedCount++;
+      } else {
+        btn.textContent = 'Show Code';
+        revealedCount--;
+      }
+      updateProgress();
+    } else {
+      btn.textContent = isOpen ? 'Show Complexity' : 'Hide Complexity';
+    }
+  });
+});
+
+function updateProgress() {
+  const total = problems.length;
+  const pct = (revealedCount / total) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${revealedCount} / ${total} revealed`;
+}
+</script>
+
+</body>
+</html>
