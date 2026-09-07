@@ -309,6 +309,30 @@
     .content-area { padding: 24px 20px; }
     .complexity-grid { grid-template-columns: 1fr; }
   }
+.nav-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.nav-group-header:hover {
+  background: rgba(107, 92, 168, 0.08);
+}
+
+.chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.nav-group-list {
+  padding-left: 8px;
+}
 </style>
 </head>
 <body>
@@ -316,7 +340,7 @@
 
   <div class="sidebar">
     <div class="sidebar-title">Topic 1 / 9</div>
-    <div class="sidebar-sub">Hash Maps</div>
+    <div class="sidebar-sub">Hash Maps</div><div style="height:8px"></div>
     <div id="navList"></div>
   </div>
 
@@ -578,6 +602,196 @@ const problems = [
 const navList = document.getElementById('navList');
 const contentArea = document.getElementById('contentArea');
 
+const concepts = [
+  {
+    id: "c1",
+    title: "Overview & Complexity",
+    html: `
+      <div class="statement">Hash maps are foundational for counting, frequency, and lookup problems. They store key-value pairs with O(1) average lookup, insert, and delete.</div>
+      <div class="section-label">Complexity summary</div>
+      <div class="complexity-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="complexity-item"><div class="complexity-tag">Insert / Delete</div><div class="complexity-reason">O(1) average, O(n) worst case</div></div>
+        <div class="complexity-item"><div class="complexity-tag">Lookup / Contains</div><div class="complexity-reason">O(1) average, O(n) worst case</div></div>
+        <div class="complexity-item"><div class="complexity-tag">Iteration</div><div class="complexity-reason">O(n) always</div></div>
+      </div>
+      <div class="section-label">Why "average" not always O(1)</div>
+      <div class="statement">Engines track a <strong>load factor</strong> (how full the internal bucket array is). Once it crosses a threshold, the engine <strong>resizes and rehashes</strong> everything into a bigger array — this is what keeps collisions rare in practice, so O(1) average holds almost all the time. Worst case (O(n)) only shows up with a poor hash function or adversarially crafted keys.</div>
+    `
+  },
+  {
+    id: "c2",
+    title: "Map vs Set vs Object",
+    html: `
+      <div class="statement">All three can store data by key, but they solve different problems.</div>
+      <div class="section-label">Decision guide</div>
+      <div class="approach">
+        <ul style="margin:0; padding-left:20px;">
+          <li><strong>Set</strong> — you only care about uniqueness, no associated value needed.</li>
+          <li><strong>Map</strong> — key-value pairs, any key type, guaranteed insertion order, needs <code>.size</code> or clean iteration.</li>
+          <li><strong>Object</strong> — fine for simple string-keyed data, but Map is generally preferred in interviews.</li>
+        </ul>
+      </div>
+      <div class="section-label">A gotcha worth knowing</div>
+      <div class="statement">Object keys are always stringified — <code>obj[1]</code> and <code>obj["1"]</code> collide as the same key. Map keeps key types distinct, so <code>map.set(1, "a")</code> and <code>map.set("1", "b")</code> are two separate entries.</div>
+      <div class="section-label">Map equality nuance</div>
+      <div class="statement">Map uses <strong>SameValueZero</strong> equality — meaning <code>NaN</code> is treated as equal to itself as a key (unlike <code>===</code>, where <code>NaN === NaN</code> is false). Rarely tested, but a sharp interviewer may probe it.</div>
+    `
+  },
+  {
+    id: "c3",
+    title: "Looping Patterns",
+    html: `
+      <div class="section-label">Object</div>
+      <pre class="code-block"><code>for (const key in obj) { console.log(key, obj[key]); }
+Object.entries(obj).forEach(([k, v]) => console.log(k, v));</code></pre>
+      <div class="section-label">Array</div>
+      <pre class="code-block"><code>for (const val of [10, 20, 30]) { console.log(val); }</code></pre>
+      <div class="section-label">String</div>
+      <pre class="code-block"><code>for (const char of "abc") { console.log(char); }</code></pre>
+      <div class="section-label">Map</div>
+      <pre class="code-block"><code>for (const [key, val] of map) { console.log(key, val); }
+map.forEach((value, key) => console.log(key, value));</code></pre>
+      <div class="section-label">Set</div>
+      <pre class="code-block"><code>for (const val of set) { console.log(val); }
+set.forEach(value => console.log(value));</code></pre>
+    `
+  },
+  {
+    id: "c4",
+    title: "Map & Set Reference",
+    html: `
+      <div class="section-label">Map — unique keys, allows duplicate values</div>
+      <pre class="code-block"><code>const map = new Map();
+map.set("apple", 10);
+map.set("apple", 20);        // overwrites -> 20
+map.get("apple");            // 20
+map.has("apple");            // true
+map.delete("apple");
+map.size;
+map.clear();</code></pre>
+      <div class="section-label">Frequency counting pattern</div>
+      <pre class="code-block"><code>const map = new Map();
+for (const num of [1, 2, 2, 3, 1, 4, 2]) {
+  map.set(num, (map.get(num) || 0) + 1);
+}
+// Map { 1 => 2, 2 => 3, 3 => 1, 4 => 1 }</code></pre>
+      <div class="statement"><code>|| 0</code> fallback: if <code>num</code> isn't in the map yet, <code>get()</code> returns <code>undefined</code>, which defaults to 0, then +1.</div>
+      <div class="section-label">Set — unique values only</div>
+      <pre class="code-block"><code>const set = new Set();
+set.add("apple");
+set.add("apple");            // ignored, duplicate
+set.has("apple");             // true
+set.delete("apple");
+set.size;
+set.clear();</code></pre>
+      <div class="section-label">Dedup pattern</div>
+      <pre class="code-block"><code>const arr = [1, 2, 2, 3, 3, 3];
+const uniqueArray = [...new Set(arr)];   // [1, 2, 3]</code></pre>
+    `
+  },
+  {
+    id: "c5",
+    title: "Collision Handling",
+    html: `
+      <div class="section-label">How set() works internally</div>
+      <div class="approach">
+        <ol>
+          <li>Key is hashed — "apple" -> hash function -> 42 (same input always gives the same number)</li>
+          <li>Hash maps to a bucket/slot index -> bucket 42 (a slot in the internal storage array)</li>
+          <li>The engine (V8, etc.) stores key + value together at that bucket -> <code>bucket[42] = {key: "apple", value: 10}</code></li>
+        </ol>
+      </div>
+      <div class="section-label">What is a collision?</div>
+      <div class="statement">Two different keys hash to the same index — e.g. "apple" and "grape" both hash to index 42.</div>
+      <div class="section-label">Collision handling strategies</div>
+      <div class="complexity-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="complexity-item"><div class="complexity-tag">Chaining</div><div class="complexity-reason">Each bucket holds a list; collisions get appended. index 42 -> [("apple",10), ("grape",20)]</div></div>
+        <div class="complexity-item"><div class="complexity-tag">Open addressing</div><div class="complexity-reason">If slot taken, probe next empty slot. 42 full -> try 43 -> then 44...</div></div>
+      </div>
+      <div class="statement">Which strategy is used is decided by the JS engine internally — not something you control.</div>
+      <div class="section-label">Interview-safe answer</div>
+      <div class="statement">"Internally, collisions are handled using techniques like chaining or open addressing depending on the implementation, so multiple keys can still be stored in the same hash bucket efficiently."</div>
+    `
+  },
+  {
+    id: "c6",
+    title: "Two Sum: Sorted vs Unsorted",
+    html: `
+      <div class="statement">If sorted -> two pointers. O(1) space, no hash map needed — left/right pointers converge based on sum comparison.</div>
+      <div class="statement" style="margin-top:8px;">If unsorted -> hash map. O(n) space, but O(n) time in one pass — sorting first would cost O(n log n), so hash map is faster than "sort then two-pointer" for an originally unsorted array.</div>
+      <div class="section-label">Interview nuance</div>
+      <div class="statement">If the problem asks for <strong>indices</strong> (like Two Sum), sorting destroys the original indices unless tracked separately — hash map is usually cleaner even if you could sort. If it asks for <strong>values</strong>, sorted + two pointers is very natural.</div>
+      <div class="section-label">Combined approach</div>
+      <pre class="code-block"><code>function twoSum(nums, target) {
+    let isSorted = true;
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] < nums[i - 1]) { isSorted = false; break; }
+    }
+
+    if (isSorted) {
+        let left = 0, right = nums.length - 1;
+        while (left < right) {
+            let sum = nums[left] + nums[right];
+            if (sum === target) return [left, right];
+            else if (sum < target) left++;
+            else right--;
+        }
+    } else {
+        const map = new Map();
+        for (let i = 0; i < nums.length; i++) {
+            let complement = target - nums[i];
+            if (map.has(complement)) {
+                return [map.get(complement), i];
+            }
+            map.set(nums[i], i);
+        }
+    }
+    return [];
+}</code></pre>
+    `
+  }
+];
+
+const conceptsGroup = document.createElement('div');
+conceptsGroup.className = 'nav-group-header';
+conceptsGroup.innerHTML = `<span class="chevron">▸</span><span>Concepts</span>`;
+navList.appendChild(conceptsGroup);
+
+const conceptsList = document.createElement('div');
+conceptsList.className = 'nav-group-list';
+conceptsList.style.display = 'none';
+
+concepts.forEach(c => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item concept-item';
+  navItem.dataset.id = c.id;
+  navItem.innerHTML = `<span>${c.title}</span>`;
+  conceptsList.appendChild(navItem);
+});
+
+navList.appendChild(conceptsList);
+
+conceptsGroup.addEventListener('click', () => {
+  const isOpen = conceptsList.style.display !== 'none';
+  conceptsList.style.display = isOpen ? 'none' : 'block';
+  conceptsGroup.querySelector('.chevron').textContent = isOpen ? '▸' : '▾';
+});
+
+const conceptDivider = document.createElement('div');
+conceptDivider.className = 'nav-divider';
+navList.appendChild(conceptDivider);
+
+concepts.forEach(c => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + c.id;
+  panel.innerHTML = `
+    <div class="problem-header"><h2 class="problem-title">${c.title}</h2></div>
+    ${c.html}
+  `;
+  contentArea.appendChild(panel);
+});
+
 const coreProblems = problems.filter(p => !p.bonus);
 const bonusProblems = problems.filter(p => p.bonus);
 
@@ -696,7 +910,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-selectProblem('p1');
+selectProblem('c1');
 </script>
 
 </body>
