@@ -368,13 +368,13 @@ const problems = [
       "Continue until pair found"
     ],
     code: `function twoSum(nums, target) {
-    const map = {};
+    const map = new Map();
     for (let i = 0; i < nums.length; i++) {
         const complement = target - nums[i];
-        if (complement in map) {
-            return [map[complement], i];
+        if (map.has(complement)) {
+            return [map.get(complement), i];
         }
-        map[nums[i]] = i;
+        map.set(nums[i], i);
     }
     return [];
 }`,
@@ -719,6 +719,8 @@ const uniqueArray = [...new Set(arr)];   // [1, 2, 3]</code></pre>
     html: `
       <div class="statement">If sorted -> two pointers. O(1) space, no hash map needed — left/right pointers converge based on sum comparison.</div>
       <div class="statement" style="margin-top:8px;">If unsorted -> hash map. O(n) space, but O(n) time in one pass — sorting first would cost O(n log n), so hash map is faster than "sort then two-pointer" for an originally unsorted array.</div>
+      <div class="statement" style="margin-top:8px;"><b>Map</b>: always O(n) time, O(n) space — works whether sorted or not 
+        </br><b>Two pointers</b>: O(n) time, O(1) space — but only works if sorted.</div>
       <div class="section-label">Interview nuance</div>
       <div class="statement">If the problem asks for <strong>indices</strong> (like Two Sum), sorting destroys the original indices unless tracked separately — hash map is usually cleaner even if you could sort. If it asks for <strong>values</strong>, sorted + two pointers is very natural.</div>
       <div class="section-label">Combined approach</div>
