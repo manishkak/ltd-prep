@@ -494,18 +494,21 @@ return true
       "Return all groups (the values of the hash map)"
     ],
     code: `function groupAnagrams(strs) {
-    const map = {};
-
+    const map = new Map();
     for (let str of strs) {
-        const sorted = str.split('').sort().join('');
-        if (!map[sorted]) {
-            map[sorted] = [];
+        let strSorted = str.split('').sort().join(''); // canonical key for this word
+        if (map.has(strSorted)) {
+            map.get(strSorted).push(str); // array is a reference — mutates in place, no need to re-set
+        } else {
+            map.set(strSorted, [str]); // new key — start its group with this word
         }
-        map[sorted].push(str);
     }
-
-    return Object.values(map);
-}`,
+    return Array.from(map.values()); // return just the grouped arrays
+}
+    // Reference vs primitive types:
+// map.get(strSorted) returns the actual array in memory, not a copy.
+// Arrays are references, so .push() mutates it directly — no need to map.set() it back.
+// Primitives (numbers/strings) are copied by value, so updating those does need map.set(key, newValue).`,
     tc: "O(n · k log k)",
     tcReason: "n strings, each sorted in O(k log k) where k is string length",
     sc: "O(n · k)",
