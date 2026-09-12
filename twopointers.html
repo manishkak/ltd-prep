@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Pointers — Interview Prep</title>
+<style>
+  :root {
+    --bg-page: #e8e8e6;
+    --bg-sidebar: #dfdfdc;
+    --bg-content: #eeeeec;
+    --bg-code: #dcdcd9;
+    --border: #cfcfcb;
+    --border-light: #d5d5d2;
+    --text-primary: #2c2c2a;
+    --text-secondary: #68675f;
+    --text-muted: #8a8980;
+    --accent: #6b5ca8;
+    --accent-light: #d2c4ec;
+    --accent-border: #a89bd6;
+    --easy-bg: #d3e8da;
+    --easy-text: #25623f;
+    --medium-bg: #f3e2c4;
+    --medium-text: #8a5a12;
+    --hard-bg: #f2d6d1;
+    --hard-text: #96311f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  .app {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 24px 14px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    padding: 0 10px 4px;
+    text-transform: uppercase;
+  }
+
+  .sidebar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 10px 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 2px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item:hover {
+    background: rgba(107, 92, 168, 0.08);
+  }
+
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--text-primary);
+    border-left: 2px solid var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-item .num {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 14px;
+  }
+
+  .nav-item.active .num {
+    color: var(--accent);
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .nav-group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  .nav-group-header:hover {
+    background: rgba(107, 92, 168, 0.08);
+  }
+
+  .chevron {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .nav-group-list {
+    padding-left: 8px;
+  }
+
+  .content-area {
+    flex: 1;
+    background: var(--bg-content);
+    padding: 36px 44px;
+    min-width: 0;
+  }
+
+  .problem-panel {
+    display: none;
+    max-width: 640px;
+  }
+
+  .problem-panel.active {
+    display: block;
+  }
+
+  .problem-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .problem-title {
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .problem-num {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .difficulty {
+    font-size: 11px;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .difficulty.easy { background: var(--easy-bg); color: var(--easy-text); }
+  .difficulty.medium { background: var(--medium-bg); color: var(--medium-text); }
+  .difficulty.hard { background: var(--hard-bg); color: var(--hard-text); }
+
+  .section-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 22px 0 8px;
+    font-weight: 600;
+  }
+
+  .section-label:first-of-type {
+    margin-top: 16px;
+  }
+
+  .statement {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  .example {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    white-space: pre-wrap;
+  }
+
+  .summary {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  .approach ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .approach li {
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .toggle-btn {
+    background: transparent;
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .toggle-btn:hover {
+    background: var(--accent-light);
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    color: #f2ede0;
+    border-color: var(--accent);
+  }
+
+  .hidden-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .hidden-content.open {
+    max-height: 2000px;
+  }
+
+  pre.code-block {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 12px 0 0;
+  }
+
+  code { color: var(--text-primary); }
+
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .complexity-item {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .complexity-tag {
+    font-family: "SF Mono", Consolas, monospace;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .complexity-reason {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 700px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      display: flex;
+      overflow-x: auto;
+      padding: 12px;
+      gap: 4px;
+    }
+    .sidebar-title, .sidebar-sub, .nav-divider { display: none; }
+    .nav-item { white-space: nowrap; margin-bottom: 0; }
+    .content-area { padding: 24px 20px; }
+    .complexity-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="sidebar-title">Topic 2 / 9</div>
+    <div class="sidebar-sub">Two Pointers</div>
+    <div id="navList"></div>
+  </div>
+
+  <div class="content-area" id="contentArea"></div>
+
+</div>
+
+<script>
+const concepts = [
+  {
+    id: "c1",
+    title: "When to Use Two Pointers",
+    html: `
+      <div class="statement">Two pointers work when you can make a reliable decision about which pointer to move, based on a comparison — usually requiring the data to be sorted, or the structure to have a clear order (like a palindrome check).</div>
+      <div class="section-label">Common signals</div>
+      <div class="approach">
+        <ul style="margin:0; padding-left:20px;">
+          <li>Array is sorted (or can be sorted without losing needed info)</li>
+          <li>Looking for a pair/triplet that sums to a target</li>
+          <li>Checking symmetry (palindrome)</li>
+          <li>Comparing/merging two sorted structures</li>
+        </ul>
+      </div>
+      <div class="section-label">Why sorting often matters</div>
+      <div class="statement">Sorting gives you a guarantee: moving one pointer inward changes the comparison value in a predictable direction. Without that order, you can't reliably decide which pointer to move — the logic breaks (we covered this with Two Sum).</div>
+    `
+  },
+  {
+    id: "c2",
+    title: "Opposite-Direction vs Same-Direction",
+    html: `
+      <div class="section-label">Opposite-direction (closing in)</div>
+      <div class="statement">Two pointers start at opposite ends and move toward each other. Used when comparing a pair across the whole range — e.g. Container With Most Water, Two Sum (sorted), Valid Palindrome.</div>
+      <div class="section-label">Same-direction (fast/slow)</div>
+      <div class="statement">Both pointers move forward, but at different speeds or for different purposes — one marks "the next valid write position," the other scans ahead. Used for in-place modification — e.g. Remove Duplicates from Sorted Array.</div>
+    `
+  },
+  {
+    id: "c3",
+    title: "Two Pointers vs Sliding Window",
+    html: `
+      <div class="statement">These are closely related but not identical:</div>
+      <div class="approach">
+        <ul style="margin:0; padding-left:20px;">
+          <li><strong>Two pointers</strong> — often start at opposite ends, moving toward each other, comparing a pair.</li>
+          <li><strong>Sliding window</strong> — both pointers move in the same direction, defining a shrinking/growing range (a "window"), usually tracking something about the substring/subarray inside it (like uniqueness, sum, or count).</li>
+        </ul>
+      </div>
+      <div class="statement">Longest Substring Without Repeating Characters (Hash Maps topic) is technically a sliding window problem, even though it uses two pointers under the hood.</div>
+    `
+  }
+];
+
+const problems = [
+  {
+    id: "p1",
+    num: 1,
+    title: "Merge Sorted Array",
+    difficulty: "easy",
+    statement: "Given two sorted arrays nums1 and nums2, merge nums2 into nums1 as one sorted array. nums1 has extra space at the end (size m + n) to hold the merged result.",
+    example: "Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3\nOutput: [1,2,2,3,5,6]",
+    summary: "Fill nums1 from the back using three pointers, comparing the largest remaining elements of each array first.",
+    approach: [
+      "Set pointer p1 at the last real element of nums1 (index m-1)",
+      "Set pointer p2 at the last element of nums2 (index n-1)",
+      "Set pointer p at the last index of the combined array (m+n-1)",
+      "Compare nums1[p1] and nums2[p2]; place the larger one at index p, move that pointer back",
+      "Repeat until nums2 is fully placed (nums1's remaining elements are already in position)",
+      "Decrement p each time a value is placed"
+    ],
+    code: `function merge(nums1, m, nums2, n) {
+    let p1 = m - 1;
+    let p2 = n - 1;
+    let p = m + n - 1;
+
+    while (p2 >= 0) {
+        if (p1 >= 0 && nums1[p1] > nums2[p2]) {
+            nums1[p] = nums1[p1];
+            p1--;
+        } else {
+            nums1[p] = nums2[p2];
+            p2--;
+        }
+        p--;
+    }
+}`,
+    tc: "O(m + n)",
+    tcReason: "each element from both arrays is visited and placed exactly once",
+    sc: "O(1)",
+    scReason: "merging happens in place within nums1, no extra structure used"
+  },
+  {
+    id: "p2",
+    num: 2,
+    title: "Remove Duplicates from Sorted Array",
+    difficulty: "easy",
+    statement: "Given a sorted array, remove duplicates in place so each unique element appears once, and return the new length. Order must be preserved.",
+    example: "Input: nums = [0,0,1,1,1,2,2,3,3,4]\nOutput: 5, nums = [0,1,2,3,4,...]",
+    summary: "Use a slow pointer to mark the next write position, and a fast pointer to scan ahead for new unique values.",
+    approach: [
+      "Set slow pointer at index 0 (first unique element is always valid)",
+      "Loop fast pointer from index 1 to the end",
+      "If nums[fast] differs from nums[slow], it's a new unique value",
+      "Move slow forward, then copy nums[fast] into nums[slow]",
+      "Continue until fast reaches the end",
+      "Return slow + 1 as the count of unique elements"
+    ],
+    code: `function removeDuplicates(nums) {
+    if (nums.length === 0) return 0;
+
+    let slow = 0;
+    for (let fast = 1; fast < nums.length; fast++) {
+        if (nums[fast] !== nums[slow]) {
+            slow++;
+            nums[slow] = nums[fast];
+        }
+    }
+    return slow + 1;
+}`,
+    tc: "O(n)",
+    tcReason: "single pass through the array with the fast pointer",
+    sc: "O(1)",
+    scReason: "modifies the array in place, no extra structure used"
+  },
+  {
+    id: "p3",
+    num: 3,
+    title: "Valid Palindrome",
+    difficulty: "easy",
+    statement: "Given a string, determine if it's a palindrome, considering only alphanumeric characters and ignoring case.",
+    example: "Input: s = \"A man, a plan, a canal: Panama\"\nOutput: true",
+    summary: "Use two pointers from opposite ends, skipping non-alphanumeric characters, and compare characters moving inward.",
+    approach: [
+      "Set left pointer at start, right pointer at end",
+      "While left < right: skip left forward past any non-alphanumeric character",
+      "Skip right backward past any non-alphanumeric character",
+      "Compare the lowercase versions of both characters; if they differ, return false",
+      "Move left forward and right backward, repeat",
+      "If the loop completes without mismatch, return true"
+    ],
+    code: `function isPalindrome(s) {
+    let left = 0;
+    let right = s.length - 1;
+
+    const isAlphanumeric = (char) => /[a-zA-Z0-9]/.test(char);
+
+    while (left < right) {
+        while (left < right && !isAlphanumeric(s[left])) left++;
+        while (left < right && !isAlphanumeric(s[right])) right--;
+
+        if (s[left].toLowerCase() !== s[right].toLowerCase()) {
+            return false;
+        }
+        left++;
+        right--;
+    }
+    return true;
+}`,
+    tc: "O(n)",
+    tcReason: "each character is visited at most once across both pointers combined",
+    sc: "O(1)",
+    scReason: "only pointers are used, no extra structure scales with input"
+  },
+  {
+    id: "p4",
+    num: 4,
+    title: "3Sum",
+    difficulty: "medium",
+    statement: "Given an array of integers, find all unique triplets [a, b, c] such that a + b + c = 0. The solution set must not contain duplicate triplets.",
+    example: "Input: nums = [-1, 0, 1, 2, -1, -4]\nOutput: [[-1, -1, 2], [-1, 0, 1]]",
+    summary: "Sort the array, fix one number, then use two pointers on the rest to find pairs that sum to its negative.",
+    approach: [
+      "Sort the array first",
+      "Loop through the array, fixing one number at index i (skip duplicates for i)",
+      "Set left = i + 1, right = end of array",
+      "While left < right: check if nums[i] + nums[left] + nums[right] equals 0",
+      "If sum is 0, record the triplet, then move both pointers inward (skip duplicates)",
+      "If sum is too small, move left forward; if too large, move right backward",
+      "Continue until all triplets are found"
+    ],
+    code: `function threeSum(nums) {
+    nums.sort((a, b) => a - b);
+    const result = [];
+
+    for (let i = 0; i < nums.length - 2; i++) {
+        if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+        let left = i + 1;
+        let right = nums.length - 1;
+
+        while (left < right) {
+            const sum = nums[i] + nums[left] + nums[right];
+            if (sum === 0) {
+                result.push([nums[i], nums[left], nums[right]]);
+                while (left < right && nums[left] === nums[left + 1]) left++;
+                while (left < right && nums[right] === nums[right - 1]) right--;
+                left++;
+                right--;
+            } else if (sum < 0) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+    }
+    return result;
+}`,
+    tc: "O(n²)",
+    tcReason: "sorting is O(n log n), then one outer loop with a two-pointer inner scan gives O(n²) overall",
+    sc: "O(1)",
+    scReason: "excluding the output array, only a constant number of pointers are used"
+  },
+  {
+    id: "p5",
+    num: 5,
+    title: "Container With Most Water",
+    difficulty: "medium",
+    statement: "Given an array of heights representing vertical lines, find two lines that together with the x-axis form a container holding the most water.",
+    example: "Input: height = [1,8,6,2,5,4,8,3,7]\nOutput: 49",
+    summary: "Use two pointers from opposite ends; always move the pointer at the shorter line inward, since it's the limiting factor.",
+    approach: [
+      "Set left pointer at index 0, right pointer at the last index",
+      "Calculate current area: min(height[left], height[right]) * (right - left)",
+      "Track the maximum area seen so far",
+      "Move the pointer at the shorter line inward (moving the taller one can't increase area, since width shrinks and height is still capped by the shorter side)",
+      "Repeat until left and right meet",
+      "Return the maximum area found"
+    ],
+    code: `function maxArea(height) {
+    let left = 0;
+    let right = height.length - 1;
+    let maxWater = 0;
+
+    while (left < right) {
+        const width = right - left;
+        const currentHeight = Math.min(height[left], height[right]);
+        maxWater = Math.max(maxWater, width * currentHeight);
+
+        if (height[left] < height[right]) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+    return maxWater;
+}`,
+    tc: "O(n)",
+    tcReason: "single pass, pointers move toward each other and never revisit positions",
+    sc: "O(1)",
+    scReason: "only pointers and a running max are used"
+  },
+  {
+    id: "p6",
+    num: 6,
+    title: "Merge Intervals",
+    difficulty: "medium",
+    statement: "Given an array of intervals, merge all overlapping intervals and return an array of the non-overlapping intervals covering all input ranges.",
+    example: "Input: intervals = [[1,3],[2,6],[8,10],[15,18]]\nOutput: [[1,6],[8,10],[15,18]]",
+    summary: "Sort intervals by start time, then walk through and merge any interval that overlaps with the last one added to the result.",
+    approach: [
+      "Sort intervals by their start value",
+      "Initialize result array with the first interval",
+      "Loop through the remaining intervals",
+      "If the current interval's start is <= the end of the last interval in result, they overlap — merge by updating the end to the max of both ends",
+      "If it doesn't overlap, push the current interval as a new entry in result",
+      "Return the result array"
+    ],
+    code: `function mergeIntervals(intervals) {
+    if (intervals.length === 0) return [];
+
+    intervals.sort((a, b) => a[0] - b[0]);
+    const result = [intervals[0]];
+
+    for (let i = 1; i < intervals.length; i++) {
+        const last = result[result.length - 1];
+        const current = intervals[i];
+
+        if (current[0] <= last[1]) {
+            last[1] = Math.max(last[1], current[1]);
+        } else {
+            result.push(current);
+        }
+    }
+    return result;
+}`,
+    tc: "O(n log n)",
+    tcReason: "dominated by the initial sort; the merge pass itself is O(n)",
+    sc: "O(n)",
+    scReason: "result array can hold up to n intervals in the worst case (no overlaps)"
+  }
+];
+
+const navList = document.getElementById('navList');
+const contentArea = document.getElementById('contentArea');
+
+const conceptsGroup = document.createElement('div');
+conceptsGroup.className = 'nav-group-header';
+conceptsGroup.innerHTML = `<span class="chevron">▸</span><span>Concepts</span>`;
+navList.appendChild(conceptsGroup);
+
+const conceptsList = document.createElement('div');
+conceptsList.className = 'nav-group-list';
+conceptsList.style.display = 'none';
+
+concepts.forEach(c => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item concept-item';
+  navItem.dataset.id = c.id;
+  navItem.innerHTML = `<span>${c.title}</span>`;
+  conceptsList.appendChild(navItem);
+});
+
+navList.appendChild(conceptsList);
+
+conceptsGroup.addEventListener('click', () => {
+  const isOpen = conceptsList.style.display !== 'none';
+  conceptsList.style.display = isOpen ? 'none' : 'block';
+  conceptsGroup.querySelector('.chevron').textContent = isOpen ? '▸' : '▾';
+});
+
+const conceptDivider = document.createElement('div');
+conceptDivider.className = 'nav-divider';
+navList.appendChild(conceptDivider);
+
+problems.forEach(p => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item';
+  navItem.dataset.id = p.id;
+  navItem.innerHTML = `<span class="num">${p.num}.</span><span>${p.title}</span>`;
+  navList.appendChild(navItem);
+});
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+concepts.forEach(c => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + c.id;
+  panel.innerHTML = `
+    <div class="problem-header"><h2 class="problem-title">${c.title}</h2></div>
+    ${c.html}
+  `;
+  contentArea.appendChild(panel);
+});
+
+problems.forEach(p => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + p.id;
+
+  panel.innerHTML = `
+    <div class="problem-header">
+      <h2 class="problem-title"><span class="problem-num">#${p.num}</span> ${p.title}</h2>
+      <span class="difficulty ${p.difficulty}">${p.difficulty}</span>
+    </div>
+
+    <div class="statement">${p.statement}</div>
+    <div class="example">${p.example}</div>
+
+    <div class="section-label">Summary</div>
+    <div class="summary">${p.summary}</div>
+
+    <div class="section-label">Approach</div>
+    <div class="approach">
+      <ol>${p.approach.map(step => `<li>${step}</li>`).join('')}</ol>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" data-target="code-${p.id}" data-type="code">Show code</button>
+      <button class="toggle-btn" data-target="complexity-${p.id}" data-type="complexity">Show complexity</button>
+    </div>
+
+    <div class="hidden-content" id="code-${p.id}">
+      <div class="section-label">Code</div>
+      <pre class="code-block"><code>${escapeHtml(p.code)}</code></pre>
+    </div>
+
+    <div class="hidden-content" id="complexity-${p.id}">
+      <div class="section-label">Complexity</div>
+      <div class="complexity-grid">
+        <div class="complexity-item">
+          <div class="complexity-tag">Time: ${p.tc}</div>
+          <div class="complexity-reason">${p.tcReason}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="complexity-tag">Space: ${p.sc}</div>
+          <div class="complexity-reason">${p.scReason}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  contentArea.appendChild(panel);
+});
+
+function selectProblem(id) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+  document.querySelectorAll('.problem-panel').forEach(el => {
+    el.classList.toggle('active', el.id === 'panel-' + id);
+  });
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => selectProblem(item.dataset.id));
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('toggle-btn')) {
+    const btn = e.target;
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    const isOpen = target.classList.contains('open');
+
+    target.classList.toggle('open');
+    btn.classList.toggle('active');
+
+    if (btn.dataset.type === 'code') {
+      btn.textContent = isOpen ? 'Show code' : 'Hide code';
+    } else {
+      btn.textContent = isOpen ? 'Show complexity' : 'Hide complexity';
+    }
+  }
+});
+
+selectProblem('p1');
+</script>
+
+</body>
+</html>
