@@ -352,6 +352,7 @@ const concepts = [
       </div>
       <div class="section-label">Why sorting often matters</div>
       <div class="statement">Sorting gives you a guarantee: moving one pointer inward changes the comparison value in a predictable direction. Without that order, you can't reliably decide which pointer to move — the logic breaks (we covered this with Two Sum).</div>
+      <div class="statement">Sorting guarantees moving left increases the sum and moving right decreases it — without that order, you can't tell which pointer to move. If the array isn't sorted, that guarantee disappears. Moving left forward might land on a bigger number, or a smaller one — you have no way to know.</div>
     `
   },
   {
