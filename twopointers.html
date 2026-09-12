@@ -387,31 +387,39 @@ const problems = [
     num: 1,
     title: "Merge Sorted Array",
     difficulty: "easy",
-    statement: "Given two sorted arrays nums1 and nums2, merge nums2 into nums1 as one sorted array. nums1 has extra space at the end (size m + n) to hold the merged result.",
+    statement: "Just practice from this, it has all the concepts: \\Grokking\\TwoPointer\\mergeSortedArrays.js</br>Given two sorted arrays nums1 and nums2, merge nums2 into nums1 as one sorted array. nums1 has extra space at the end (size m + n) to hold the merged result.",
     example: "Input: nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3\nOutput: [1,2,2,3,5,6]",
     summary: "Fill nums1 from the back using three pointers, comparing the largest remaining elements of each array first.",
     approach: [
-      "Set pointer p1 at the last real element of nums1 (index m-1)",
-      "Set pointer p2 at the last element of nums2 (index n-1)",
-      "Set pointer p at the last index of the combined array (m+n-1)",
-      "Compare nums1[p1] and nums2[p2]; place the larger one at index p, move that pointer back",
-      "Repeat until nums2 is fully placed (nums1's remaining elements are already in position)",
-      "Decrement p each time a value is placed"
-    ],
+  "Set i = m - 1 (last valid element in nums1)",
+  "Set j = n - 1 (last element in nums2)",
+  "Set k = m + n - 1 (last index of the final merged array)",
+  "While i >= 0 and j >= 0: compare nums1[i] and nums2[j]",
+  "Place the larger of the two at nums1[k], then move that pointer (i or j) one step left",
+  "Move k one step left after each placement",
+  "After the loop, if nums2 still has elements left, copy them into nums1 directly (no comparison needed)",
+  "If nums1 still has elements left instead, leave them as is — they're already in the correct position"
+],
     code: `function merge(nums1, m, nums2, n) {
-    let p1 = m - 1;
-    let p2 = n - 1;
-    let p = m + n - 1;
+    let i = m - 1; // 2
+    let j = n - 1; // 2
+    let k = m + n - 1; // 5, total length we need for final nums1
 
-    while (p2 >= 0) {
-        if (p1 >= 0 && nums1[p1] > nums2[p2]) {
-            nums1[p] = nums1[p1];
-            p1--;
+    while (i >= 0 && j >= 0) {
+        if (nums1[i] > nums2[j]) {
+            nums1[k] = nums1[i];
+            i--;
         } else {
-            nums1[p] = nums2[p2];
-            p2--;
+            nums1[k] = nums2[j];
+            j--;
         }
-        p--;
+        k--;
+    }
+
+    while (j >= 0) {
+        nums1[k] = nums2[j];
+        j--;
+        k--;
     }
 }`,
     tc: "O(m + n)",
