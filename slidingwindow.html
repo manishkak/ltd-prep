@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Window — Interview Prep</title>
+<style>
+  :root {
+    --bg-page: #e8e8e6;
+    --bg-sidebar: #dfdfdc;
+    --bg-content: #eeeeec;
+    --bg-code: #dcdcd9;
+    --border: #cfcfcb;
+    --border-light: #d5d5d2;
+    --text-primary: #2c2c2a;
+    --text-secondary: #68675f;
+    --text-muted: #8a8980;
+    --accent: #6b5ca8;
+    --accent-light: #d2c4ec;
+    --accent-border: #a89bd6;
+    --easy-bg: #d3e8da;
+    --easy-text: #25623f;
+    --medium-bg: #f3e2c4;
+    --medium-text: #8a5a12;
+    --hard-bg: #f2d6d1;
+    --hard-text: #96311f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  .app {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 24px 14px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    padding: 0 10px 4px;
+    text-transform: uppercase;
+  }
+
+  .sidebar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 10px 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 2px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item:hover {
+    background: rgba(107, 92, 168, 0.08);
+  }
+
+  .nav-item.active {
+    background: var(--accent-light);
+    color: var(--text-primary);
+    border-left: 2px solid var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-item .num {
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 14px;
+  }
+
+  .nav-item.active .num {
+    color: var(--accent);
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .nav-group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  .nav-group-header:hover {
+    background: rgba(107, 92, 168, 0.08);
+  }
+
+  .chevron {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .nav-group-list {
+    padding-left: 8px;
+  }
+
+  .content-area {
+    flex: 1;
+    background: var(--bg-content);
+    padding: 36px 44px;
+    min-width: 0;
+  }
+
+  .problem-panel {
+    display: none;
+    max-width: 640px;
+  }
+
+  .problem-panel.active {
+    display: block;
+  }
+
+  .problem-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .problem-title {
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .problem-num {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .difficulty {
+    font-size: 11px;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .difficulty.easy { background: var(--easy-bg); color: var(--easy-text); }
+  .difficulty.medium { background: var(--medium-bg); color: var(--medium-text); }
+  .difficulty.hard { background: var(--hard-bg); color: var(--hard-text); }
+
+  .section-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 22px 0 8px;
+    font-weight: 600;
+  }
+
+  .section-label:first-of-type {
+    margin-top: 16px;
+  }
+
+  .statement {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  .example {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    white-space: pre-wrap;
+  }
+
+  .summary {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  .approach ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .approach li {
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .toggle-btn {
+    background: transparent;
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .toggle-btn:hover {
+    background: var(--accent-light);
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    color: #f2ede0;
+    border-color: var(--accent);
+  }
+
+  .hidden-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .hidden-content.open {
+    max-height: 2000px;
+  }
+
+  pre.code-block {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 12px 0 0;
+  }
+
+  code { color: var(--text-primary); }
+
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .complexity-item {
+    background: var(--bg-code);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+
+  .complexity-tag {
+    font-family: "SF Mono", Consolas, monospace;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .complexity-reason {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 700px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      display: flex;
+      overflow-x: auto;
+      padding: 12px;
+      gap: 4px;
+    }
+    .sidebar-title, .sidebar-sub, .nav-divider { display: none; }
+    .nav-item { white-space: nowrap; margin-bottom: 0; }
+    .content-area { padding: 24px 20px; }
+    .complexity-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="sidebar-title">Topic 4 / 9</div>
+    <div class="sidebar-sub">Sliding Window</div>
+    <div id="navList"></div>
+  </div>
+
+  <div class="content-area" id="contentArea"></div>
+
+</div>
+
+<script>
+const concepts = [
+  {
+    id: "c1",
+    title: "Fixed vs Variable Window",
+    html: `
+      <div class="statement">Sliding window problems fall into two shapes, and recognizing which one you're facing decides your whole approach.</div>
+      <div class="section-label">Fixed-size window</div>
+      <div class="statement">The window size k is given upfront and never changes. You add one element on the right, and once the window exceeds size k, you remove one from the left — the window slides, but its size stays constant.</div>
+      <div class="section-label">Variable-size window</div>
+      <div class="statement">The window grows and shrinks based on a condition (like "sum >= target" or "all characters unique"). You expand right until the condition is met or broken, then shrink left to try to optimize (minimize or maximize) while the condition still holds.</div>
+    `
+  },
+  {
+    id: "c2",
+    title: "The Expand-Shrink Mental Model",
+    html: `
+      <div class="statement">Almost every variable-window problem follows the same shape:</div>
+      <div class="approach">
+        <ol>
+          <li>Move right forward, adding the new element to your running state (sum, count, frequency map, etc.)</li>
+          <li>Check: does the window now violate or satisfy your condition?</li>
+          <li>If it violates the condition, shrink from the left (move left forward, removing that element from your state) until it's valid again</li>
+          <li>If it satisfies the condition, record it as a candidate answer (track max/min length, etc.)</li>
+          <li>Continue until right reaches the end of the array/string</li>
+        </ol>
+      </div>
+      <div class="statement">This is why sliding window achieves O(n) — each element is added once (by right) and removed at most once (by left), so total work is linear, not the O(n²) of checking every possible window from scratch.</div>
+    `
+  },
+  {
+    id: "c3",
+    title: "Sliding Window vs Two Pointers",
+    html: `
+      <div class="statement">These are closely related, and the line between them is blurry — but a useful distinction:</div>
+      <div class="approach">
+        <ul style="margin:0; padding-left:20px;">
+          <li><strong>Two pointers (classic)</strong> — often start at opposite ends, moving toward each other, comparing a pair (like Two Sum sorted, Container With Water).</li>
+          <li><strong>Sliding window</strong> — both pointers move in the same direction (left never passes right going backward), defining a contiguous range you're tracking some running property of (sum, uniqueness, frequency).</li>
+        </ul>
+      </div>
+      <div class="statement">In practice: if the problem asks about a "substring" or "subarray" (a contiguous chunk) and involves a running condition, it's sliding window. If it's about finding a pair/triplet across the whole structure, it's classic two pointers.</div>
+    `
+  },
+  {
+    id: "c4",
+    title: "Common Triggers",
+    html: `
+      <div class="statement">Phrases in a problem that usually signal sliding window:</div>
+      <div class="approach">
+        <ul style="margin:0; padding-left:20px;">
+          <li>"longest substring/subarray that satisfies..."</li>
+          <li>"shortest/minimum substring/subarray that satisfies..."</li>
+          <li>"subarray of size k"</li>
+          <li>"contains all characters of..." or "is a permutation of..."</li>
+          <li>"at most k distinct..." or "no more than k..."</li>
+        </ul>
+      </div>
+    `
+  }
+];
+
+const problems = [
+  {
+    id: "p1",
+    num: 1,
+    title: "Maximum Sum Subarray of Size K",
+    difficulty: "easy",
+    statement: "Given an array of integers and an integer k, find the maximum sum of any contiguous subarray of size k.",
+    example: "Input: nums = [2, 1, 5, 1, 3, 2], k = 3\nOutput: 9\nExplanation: subarray [5, 1, 3] has the maximum sum of 9.",
+    summary: "Fixed-size window: add the incoming right element, and once the window reaches size k, remove the outgoing left element before comparing sums.",
+    approach: [
+      "Initialize windowSum = 0, maxSum = 0, and left = 0",
+      "Loop right from 0 to the end of the array",
+      "Add nums[right] to windowSum",
+      "If the window size (right - left + 1) equals k, update maxSum with the larger of maxSum and windowSum",
+      "Then subtract nums[left] from windowSum and move left forward (shrinking back to size k-1, ready for the next element)",
+      "Return maxSum"
+    ],
+    code: `function maxSumSubarray(nums, k) {
+    let windowSum = 0;
+    let maxSum = 0;
+    let left = 0;
+
+    for (let right = 0; right < nums.length; right++) {
+        windowSum += nums[right];
+
+        if (right - left + 1 === k) {
+            maxSum = Math.max(maxSum, windowSum);
+            windowSum -= nums[left];
+            left++;
+        }
+    }
+
+    return maxSum;
+}`,
+    tc: "O(n)",
+    tcReason: "each element is added once and removed at most once as the window slides",
+    sc: "O(1)",
+    scReason: "only a running sum and pointers are used, no extra structure scales with input"
+  },
+  {
+    id: "p2",
+    num: 2,
+    title: "Longest Substring Without Repeating Characters",
+    difficulty: "medium",
+    statement: "Given a string, find the length of the longest substring that contains no repeating characters.",
+    example: "Input: s = \"abcabcbb\"\nOutput: 3\nExplanation: the answer is \"abc\", with length 3.",
+    summary: "Use a hash map plus a sliding window to track the last seen position of each character and find the longest valid window.",
+    approach: [
+      "Create a hash map to store the last seen index of each character",
+      "Use two pointers: left and right, both starting at 0",
+      "Expand the window by moving right one step at a time",
+      "If the character at right was seen before and is inside the current window, move left just past that previous occurrence",
+      "Update the character's last seen index to right",
+      "Track the maximum window size (right - left + 1) seen so far",
+      "Return the maximum length"
+    ],
+    code: `function lengthOfLongestSubstring(s) {
+    const map = new Map();
+    let left = 0;
+    let maxLen = 0;
+
+    for (let right = 0; right < s.length; right++) {
+        if (map.has(s[right]) && map.get(s[right]) >= left) {
+            left = map.get(s[right]) + 1;
+        }
+        map.set(s[right], right);
+        maxLen = Math.max(maxLen, right - left + 1);
+    }
+
+    return maxLen;
+}`,
+    tc: "O(n)",
+    tcReason: "left and right pointers each move forward at most n times total",
+    sc: "O(min(n, m))",
+    scReason: "hash map stores at most one entry per distinct character (m = alphabet size)"
+  },
+  {
+    id: "p3",
+    num: 3,
+    title: "Longest Repeating Character Replacement",
+    difficulty: "medium",
+    statement: "Given a string and an integer k, you can replace up to k characters in the string with any other character. Find the length of the longest substring containing the same letter, after performing at most k replacements.",
+    example: "Input: s = \"AABABBA\", k = 1\nOutput: 4\nExplanation: replace one 'A' with 'B' to get \"AABBBBA\" → longest same-letter run is \"BBBB\", length 4.",
+    summary: "Expand the window, tracking character counts; shrink only when the number of replacements needed (window size minus the most frequent character's count) exceeds k.",
+    approach: [
+      "Create a hash map to count character frequencies within the window",
+      "Track maxFreq — the count of the most frequent character seen in any window so far",
+      "Loop right through the string, incrementing the count for the current character",
+      "Update maxFreq with the current character's count if it's higher",
+      "Check: does (window size - maxFreq) exceed k? That's the number of characters that would need replacing",
+      "If it exceeds k, shrink from the left: decrement that character's count and move left forward",
+      "Track the maximum window size seen at any valid point",
+      "Return the maximum length"
+    ],
+    code: `function characterReplacement(s, k) {
+    const map = new Map();
+    let left = 0;
+    let maxFreq = 0;
+    let maxLen = 0;
+
+    for (let right = 0; right < s.length; right++) {
+        map.set(s[right], (map.get(s[right]) || 0) + 1);
+        maxFreq = Math.max(maxFreq, map.get(s[right]));
+
+        const windowSize = right - left + 1;
+        if (windowSize - maxFreq > k) {
+            map.set(s[left], map.get(s[left]) - 1);
+            left++;
+        }
+
+        maxLen = Math.max(maxLen, right - left + 1);
+    }
+
+    return maxLen;
+}`,
+    tc: "O(n)",
+    tcReason: "single pass, each character processed a constant number of times by left and right combined",
+    sc: "O(1)",
+    scReason: "hash map holds at most 26 entries (uppercase English letters), a constant size"
+  },
+  {
+    id: "p4",
+    num: 4,
+    title: "Permutation in String",
+    difficulty: "medium",
+    statement: "Given two strings s1 and s2, return true if s2 contains a permutation of s1 as a contiguous substring.",
+    example: "Input: s1 = \"ab\", s2 = \"eidbaooo\"\nOutput: true\nExplanation: s2 contains \"ba\", which is a permutation of \"ab\".",
+    summary: "Use a fixed-size window (size = s1.length) sliding across s2, comparing character frequency counts to s1's frequency count.",
+    approach: [
+      "Build a frequency map of s1's characters",
+      "Build a frequency map for the first window of s2 (same size as s1)",
+      "Compare the two maps — if equal, a permutation is found, return true",
+      "Slide the window one step at a time: add the new right character's count, remove the outgoing left character's count",
+      "After each slide, compare the maps again",
+      "If no match is found by the end, return false"
+    ],
+    code: `function checkInclusion(s1, s2) {
+    if (s1.length > s2.length) return false;
+
+    const s1Map = new Map();
+    const windowMap = new Map();
+
+    for (let char of s1) {
+        s1Map.set(char, (s1Map.get(char) || 0) + 1);
+    }
+
+    const mapsEqual = (a, b) => {
+        if (a.size !== b.size) return false;
+        for (let [key, val] of a) {
+            if (b.get(key) !== val) return false;
+        }
+        return true;
+    };
+
+    for (let i = 0; i < s2.length; i++) {
+        windowMap.set(s2[i], (windowMap.get(s2[i]) || 0) + 1);
+
+        if (i >= s1.length) {
+            const leftChar = s2[i - s1.length];
+            windowMap.set(leftChar, windowMap.get(leftChar) - 1);
+            if (windowMap.get(leftChar) === 0) windowMap.delete(leftChar);
+        }
+
+        if (i >= s1.length - 1 && mapsEqual(s1Map, windowMap)) {
+            return true;
+        }
+    }
+
+    return false;
+}`,
+    tc: "O(n)",
+    tcReason: "s2 is scanned once; map comparison is bounded by alphabet size (constant), not n",
+    sc: "O(1)",
+    scReason: "both frequency maps hold at most 26 entries (constant size), independent of input length"
+  },
+  {
+    id: "p5",
+    num: 5,
+    title: "Minimum Size Subarray Sum",
+    difficulty: "medium",
+    statement: "Given an array of positive integers and a target sum, find the minimal length of a contiguous subarray whose sum is greater than or equal to target. Return 0 if no such subarray exists.",
+    example: "Input: target = 7, nums = [2,3,1,2,4,3]\nOutput: 2\nExplanation: the subarray [4,3] has the minimal length under the problem constraint.",
+    summary: "Expand the window until the sum meets the target, then aggressively shrink from the left to find the minimum length while the condition still holds.",
+    approach: [
+      "Initialize left = 0, windowSum = 0, minLen = Infinity",
+      "Loop right through the array, adding nums[right] to windowSum",
+      "While windowSum >= target: update minLen with the smaller of minLen and the current window size",
+      "Then shrink: subtract nums[left] from windowSum and move left forward",
+      "Continue trying to shrink as long as the sum still satisfies the condition",
+      "Return minLen if it was updated, otherwise return 0"
+    ],
+    code: `function minSubArrayLen(target, nums) {
+    let left = 0;
+    let windowSum = 0;
+    let minLen = Infinity;
+
+    for (let right = 0; right < nums.length; right++) {
+        windowSum += nums[right];
+
+        while (windowSum >= target) {
+            minLen = Math.min(minLen, right - left + 1);
+            windowSum -= nums[left];
+            left++;
+        }
+    }
+
+    return minLen === Infinity ? 0 : minLen;
+}`,
+    tc: "O(n)",
+    tcReason: "left and right pointers each move forward at most n times total across the whole run",
+    sc: "O(1)",
+    scReason: "only a running sum and pointers are used, no extra structure scales with input"
+  },
+  {
+    id: "p6",
+    num: 6,
+    title: "Minimum Window Substring",
+    difficulty: "medium",
+    statement: "Given two strings s and t, find the minimum window substring of s such that every character in t (including duplicates) is included in the window. Return an empty string if no such substring exists.",
+    example: "Input: s = \"ADOBECODEBANC\", t = \"ABC\"\nOutput: \"BANC\"",
+    summary: "Expand the window until it contains all required characters from t, then aggressively shrink from the left to minimize it while still valid, tracking the best window found.",
+    approach: [
+      "Build a frequency map of characters needed from t",
+      "Track 'required' — the number of distinct characters that still need to be fully satisfied",
+      "Expand right, updating a window frequency map; when a character's count matches what's needed, decrement 'required'",
+      "Once required reaches 0, the window is valid — try shrinking from the left",
+      "While shrinking, if removing left's character breaks the validity (count drops below what's needed), increment required back and stop shrinking",
+      "Track the smallest valid window's start and length throughout",
+      "Return the substring for the smallest window found, or empty string if none was found"
+    ],
+    code: `function minWindow(s, t) {
+    if (t.length === 0 || s.length === 0) return "";
+
+    const need = new Map();
+    for (let char of t) {
+        need.set(char, (need.get(char) || 0) + 1);
+    }
+
+    let required = need.size;
+    let left = 0;
+    let formed = 0;
+    const windowCounts = new Map();
+
+    let bestLen = Infinity;
+    let bestLeft = 0;
+
+    for (let right = 0; right < s.length; right++) {
+        const char = s[right];
+        windowCounts.set(char, (windowCounts.get(char) || 0) + 1);
+
+        if (need.has(char) && windowCounts.get(char) === need.get(char)) {
+            formed++;
+        }
+
+        while (formed === required) {
+            if (right - left + 1 < bestLen) {
+                bestLen = right - left + 1;
+                bestLeft = left;
+            }
+
+            const leftChar = s[left];
+            windowCounts.set(leftChar, windowCounts.get(leftChar) - 1);
+            if (need.has(leftChar) && windowCounts.get(leftChar) < need.get(leftChar)) {
+                formed--;
+            }
+            left++;
+        }
+    }
+
+    return bestLen === Infinity ? "" : s.substring(bestLeft, bestLeft + bestLen);
+}`,
+    tc: "O(n + m)",
+    tcReason: "s is scanned once by left and right combined; t is scanned once to build the need map",
+    sc: "O(m)",
+    scReason: "need map size is bounded by the distinct characters in t"
+  }
+];
+
+const bonusProblems = [
+  { id: "b1", title: "Average of Subarrays of Size K" },
+  { id: "b2", title: "Contains Duplicate II" },
+  { id: "b3", title: "Maximum Number of Vowels in a Substring of Given Length" },
+  { id: "b4", title: "Fruit Into Baskets" },
+  { id: "b5", title: "Subarray Product Less Than K" },
+  { id: "b6", title: "Sliding Window Maximum (Hard — monotonic deque)" },
+  { id: "b7", title: "Substring with Concatenation of All Words (Hard)" },
+  { id: "b8", title: "Longest Substring with At Most K Distinct Characters" }
+];
+
+const navList = document.getElementById('navList');
+const contentArea = document.getElementById('contentArea');
+
+const conceptsGroup = document.createElement('div');
+conceptsGroup.className = 'nav-group-header';
+conceptsGroup.innerHTML = `<span class="chevron">▸</span><span>Concepts</span>`;
+navList.appendChild(conceptsGroup);
+
+const conceptsList = document.createElement('div');
+conceptsList.className = 'nav-group-list';
+conceptsList.style.display = 'none';
+
+concepts.forEach(c => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item concept-item';
+  navItem.dataset.id = c.id;
+  navItem.innerHTML = `<span>${c.title}</span>`;
+  conceptsList.appendChild(navItem);
+});
+
+navList.appendChild(conceptsList);
+
+conceptsGroup.addEventListener('click', () => {
+  const isOpen = conceptsList.style.display !== 'none';
+  conceptsList.style.display = isOpen ? 'none' : 'block';
+  conceptsGroup.querySelector('.chevron').textContent = isOpen ? '▸' : '▾';
+});
+
+const conceptDivider = document.createElement('div');
+conceptDivider.className = 'nav-divider';
+navList.appendChild(conceptDivider);
+
+problems.forEach(p => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item';
+  navItem.dataset.id = p.id;
+  navItem.innerHTML = `<span class="num">${p.num}.</span><span>${p.title}</span>`;
+  navList.appendChild(navItem);
+});
+
+const bonusDivider = document.createElement('div');
+bonusDivider.className = 'nav-divider';
+navList.appendChild(bonusDivider);
+
+const bonusGroup = document.createElement('div');
+bonusGroup.className = 'nav-group-header';
+bonusGroup.innerHTML = `<span class="chevron">▸</span><span>Bonus Problems</span>`;
+navList.appendChild(bonusGroup);
+
+const bonusList = document.createElement('div');
+bonusList.className = 'nav-group-list';
+bonusList.style.display = 'none';
+
+bonusProblems.forEach(b => {
+  const navItem = document.createElement('div');
+  navItem.className = 'nav-item';
+  navItem.dataset.id = b.id;
+  navItem.innerHTML = `<span>${b.title}</span>`;
+  bonusList.appendChild(navItem);
+});
+
+navList.appendChild(bonusList);
+
+bonusGroup.addEventListener('click', () => {
+  const isOpen = bonusList.style.display !== 'none';
+  bonusList.style.display = isOpen ? 'none' : 'block';
+  bonusGroup.querySelector('.chevron').textContent = isOpen ? '▸' : '▾';
+});
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+concepts.forEach(c => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + c.id;
+  panel.innerHTML = `
+    <div class="problem-header"><h2 class="problem-title">${c.title}</h2></div>
+    ${c.html}
+  `;
+  contentArea.appendChild(panel);
+});
+
+problems.forEach(p => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + p.id;
+
+  panel.innerHTML = `
+    <div class="problem-header">
+      <h2 class="problem-title"><span class="problem-num">#${p.num}</span> ${p.title}</h2>
+      <span class="difficulty ${p.difficulty}">${p.difficulty}</span>
+    </div>
+
+    <div class="statement">${p.statement}</div>
+    <div class="example">${p.example}</div>
+
+    <div class="section-label">Summary</div>
+    <div class="summary">${p.summary}</div>
+
+    <div class="section-label">Approach</div>
+    <div class="approach">
+      <ol>${p.approach.map(step => `<li>${step}</li>`).join('')}</ol>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" data-target="code-${p.id}" data-type="code">Show code</button>
+      <button class="toggle-btn" data-target="complexity-${p.id}" data-type="complexity">Show complexity</button>
+    </div>
+
+    <div class="hidden-content" id="code-${p.id}">
+      <div class="section-label">Code</div>
+      <pre class="code-block"><code>${escapeHtml(p.code)}</code></pre>
+    </div>
+
+    <div class="hidden-content" id="complexity-${p.id}">
+      <div class="section-label">Complexity</div>
+      <div class="complexity-grid">
+        <div class="complexity-item">
+          <div class="complexity-tag">Time: ${p.tc}</div>
+          <div class="complexity-reason">${p.tcReason}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="complexity-tag">Space: ${p.sc}</div>
+          <div class="complexity-reason">${p.scReason}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  contentArea.appendChild(panel);
+});
+
+bonusProblems.forEach(b => {
+  const panel = document.createElement('div');
+  panel.className = 'problem-panel';
+  panel.id = 'panel-' + b.id;
+  panel.innerHTML = `
+    <div class="problem-header"><h2 class="problem-title">${b.title}</h2></div>
+    <div class="statement">Revisit during review pass — not part of first-pass core topics.</div>
+  `;
+  contentArea.appendChild(panel);
+});
+
+function selectProblem(id) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+  document.querySelectorAll('.problem-panel').forEach(el => {
+    el.classList.toggle('active', el.id === 'panel-' + id);
+  });
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => selectProblem(item.dataset.id));
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('toggle-btn')) {
+    const btn = e.target;
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    const isOpen = target.classList.contains('open');
+
+    target.classList.toggle('open');
+    btn.classList.toggle('active');
+
+    if (btn.dataset.type === 'code') {
+      btn.textContent = isOpen ? 'Show code' : 'Hide code';
+    } else {
+      btn.textContent = isOpen ? 'Show complexity' : 'Hide complexity';
+    }
+  }
+});
+
+selectProblem('p1');
+</script>
+
+</body>
+</html>
